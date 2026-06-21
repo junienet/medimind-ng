@@ -1,3 +1,3 @@
 export const environment = {
-  apiBase: 'http://localhost:3000/api',
+  apiBase: 'https://medimind-backend-production.up.railway.app/api',
 };
