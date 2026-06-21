@@ -1,0 +1,22 @@
+<div class="md:hidden flex items-center justify-between px-5 py-4 border-b border-black/10 bg-white">
+  <div class="flex items-center gap-2.5">
+    <svg viewBox="0 0 36 36" fill="none" class="w-7 h-7">
+      <rect width="36" height="36" rx="10" fill="rgba(22,163,74,0.15)" />
+      <path d="M18 8v20M8 18h20" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" />
+    </svg>
+    <span class="font-display text-lg text-slate-800">MediMind</span>
+  </div>
+  <button
+    (click)="toggleSidebar()"
+    class="px-3 py-1.5 border border-black/10 rounded-lg text-sm hover:border-primary hover:text-primary transition-colors cursor-pointer bg-transparent"
+  >
+    ☰
+  </button>
+</div>
+
+<div class="flex flex-1 min-h-screen">
+  <app-sidebar [role]="role" [open]="sidebarOpen()" />
+  <main class="flex-1 overflow-y-auto p-8 md:p-10">
+    <router-outlet />
+  </main>
+</div>

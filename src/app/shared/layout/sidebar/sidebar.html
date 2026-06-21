@@ -1,0 +1,53 @@
+<aside class="sidebar w-60 bg-white border-r border-black/10 flex flex-col py-7 flex-shrink-0" [class.open]="open">
+  <div class="flex items-center gap-2.5 px-6 pb-8 border-b border-black/10 mb-4">
+    <svg viewBox="0 0 36 36" fill="none" class="w-7 h-7 flex-shrink-0">
+      <rect width="36" height="36" rx="10" fill="rgba(22,163,74,0.15)" />
+      <path d="M18 8v20M8 18h20" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" />
+      <circle cx="18" cy="18" r="5" stroke="#16a34a" stroke-width="2" />
+    </svg>
+    <span class="font-display text-xl tracking-tight text-slate-800">MediMind</span>
+  </div>
+
+  <nav class="px-4 mb-1">
+    <p class="text-[0.65rem] uppercase tracking-widest text-slate-400 px-2 mb-1.5 capitalize">{{ role }}</p>
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        class="nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all no-underline mb-0.5"
+      >
+        <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [innerHTML]="item.icon"></svg>
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
+  <div class="px-4 mb-2">
+    <button
+      (click)="theme.toggle()"
+      class="theme-toggle-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all border-none bg-transparent cursor-pointer text-slate-500 hover:text-slate-700 hover:bg-black/5"
+    >
+      @if (!theme.isDark()) {
+        <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      } @else {
+        <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      }
+      <span>{{ theme.isDark() ? 'Light Mode' : 'Dark Mode' }}</span>
+    </button>
+  </div>
+
+  <div class="mt-auto px-4 pt-4 border-t border-black/10">
+    <div class="flex items-center gap-2.5 p-2.5 rounded-lg">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0" style="background:linear-gradient(135deg,#15803d,#16a34a)">
+        {{ initials }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium truncate text-slate-800">{{ auth.user()?.name ?? '—' }}</div>
+        <div class="text-xs text-slate-500 capitalize">{{ auth.user()?.user_type ?? '—' }}</div>
+      </div>
+    </div>
+    <button (click)="logout()" class="w-full mt-2 py-2 border border-black/10 rounded-lg text-sm hover:border-primary hover:text-primary transition-colors cursor-pointer bg-transparent text-slate-600">
+      Sign Out
+    </button>
+  </div>
+</aside>

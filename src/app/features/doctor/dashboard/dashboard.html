@@ -1,0 +1,19 @@
+<div class="mb-8">
+  <h2 class="font-display text-3xl tracking-tight mb-1 text-slate-800">Doctor Dashboard</h2>
+  <p class="text-slate-500 text-sm">{{ greeting }}</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+  <div class="bg-white border border-black/10 rounded-2xl p-5 hover:border-primary/30 transition-colors shadow-sm">
+    <p class="text-xs uppercase tracking-widest text-slate-400 mb-2.5">Total Patients</p>
+    <p class="font-display text-3xl font-light text-primary">{{ statPatients() ?? '—' }}</p>
+  </div>
+  <div class="bg-white border border-black/10 rounded-2xl p-5 hover:border-primary/30 transition-colors shadow-sm">
+    <p class="text-xs uppercase tracking-widest text-slate-400 mb-2.5">Active Prescriptions</p>
+    <p class="font-display text-3xl font-light text-green-700">{{ statPrescriptions() ?? '—' }}</p>
+  </div>
+</div>
+<div class="section-title flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400 mb-4">Quick Actions</div>
+<div class="flex gap-3 flex-wrap">
+  <a routerLink="/doctor/patients" class="px-6 py-2.5 border border-black/10 rounded-xl text-sm hover:border-primary hover:text-primary transition-colors no-underline text-slate-700 bg-white shadow-sm">View Patients</a>
+  <a routerLink="/doctor/prescribe" class="px-6 py-2.5 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-primary-dark transition-colors no-underline shadow-sm">New Prescription</a>
+</div>

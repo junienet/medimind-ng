@@ -1,0 +1,35 @@
+<div class="mb-8">
+  <h2 class="font-display text-3xl tracking-tight mb-1 text-slate-800">Medication History</h2>
+  <p class="text-slate-500 text-sm">Your past medication logs</p>
+</div>
+
+<div class="bg-white border border-black/10 rounded-2xl overflow-hidden mb-6 shadow-sm">
+  <table class="w-full border-collapse">
+    <thead>
+      <tr class="border-b border-black/10 bg-primary-lighter">
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Medication</th>
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Scheduled</th>
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Taken At</th>
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading()) {
+        <tr><td colspan="4"><div class="flex items-center justify-center gap-3 py-10 text-slate-400"><div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div></div></td></tr>
+      } @else if (errorMessage()) {
+        <tr><td colspan="4" class="px-4 py-5 text-red-600 text-sm">{{ errorMessage() }}</td></tr>
+      } @else if (!logs().length) {
+        <tr><td colspan="4"><div class="text-center py-14 text-slate-400 text-sm">No history yet</div></td></tr>
+      } @else {
+        @for (l of logs(); track l._id) {
+          <tr>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10">{{ medOf(l)?.medication_name || '—' }} <span class="text-slate-400 text-xs">{{ medOf(l)?.dosage || '' }}</span></td>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10">{{ l.scheduled_time || '—' }}</td>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10">{{ l.taken_time ? formatTime(l.taken_time) : '—' }}</td>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10"><span class="px-2.5 py-1 rounded-full text-[0.7rem] font-medium" [class]="badgeClass[l.status || ''] || ''">{{ l.status }}</span></td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

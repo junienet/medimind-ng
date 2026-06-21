@@ -1,0 +1,108 @@
+<div class="mb-8">
+  <h2 class="font-display text-3xl tracking-tight mb-1 text-slate-800">Dashboard</h2>
+  <p class="text-slate-500 text-sm">
+    @if (loading()) { Loading… } @else { {{ greeting }}, {{ firstName }}! Here's your medication schedule for today. }
+  </p>
+</div>
+
+@if (errorMessage()) {
+  <p class="text-red-600 text-sm mb-4">{{ errorMessage() }}</p>
+}
+
+<!-- Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+  <div class="bg-white border border-black/10 rounded-2xl p-5 hover:border-primary/30 transition-colors shadow-sm">
+    <p class="text-xs uppercase tracking-widest text-slate-400 mb-2.5">Due Today</p>
+    <p class="font-display text-3xl font-light text-primary">{{ loading() ? '—' : due().length }}</p>
+  </div>
+  <div class="bg-white border border-black/10 rounded-2xl p-5 hover:border-primary/30 transition-colors shadow-sm">
+    <p class="text-xs uppercase tracking-widest text-slate-400 mb-2.5">Completed</p>
+    <p class="font-display text-3xl font-light text-green-700">{{ loading() ? '—' : done().length }}</p>
+  </div>
+  <div class="bg-white border border-black/10 rounded-2xl p-5 hover:border-primary/30 transition-colors shadow-sm">
+    <p class="text-xs uppercase tracking-widest text-slate-400 mb-2.5">Upcoming</p>
+    <p class="font-display text-3xl font-light text-amber-600">{{ loading() ? '—' : upcoming().length }}</p>
+  </div>
+</div>
+
+@for (section of [
+  { title: 'Take Now', items: due(), type: 'active' },
+  { title: 'Upcoming', items: upcoming(), type: 'upcoming' },
+  { title: 'Completed', items: done(), type: 'done' }
+]; track section.title) {
+  <div class="section-title flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400 mb-3.5">{{ section.title }}</div>
+  <div class="flex flex-col gap-3 mb-8">
+    @if (loading()) {
+      <div class="flex items-center justify-center gap-3 py-10 text-slate-400 text-sm">
+        <div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>Loading…
+      </div>
+    } @else if (!section.items.length) {
+      <div class="text-center py-14 text-slate-400">
+        <svg class="w-12 h-12 mx-auto mb-4 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
+        <p class="text-sm">No medications here</p>
+      </div>
+    } @else {
+      @for (r of section.items; track r._id) {
+        <div
+          (click)="open(r)"
+          class="medicine-card bg-white border border-black/10 rounded-2xl px-5 py-4 flex items-center gap-4 cursor-pointer transition-all shadow-sm"
+          [class.opacity-60]="section.type === 'done'"
+        >
+          <div class="w-11 h-11 rounded-xl border flex items-center justify-center flex-shrink-0"
+               [class.bg-primary/10]="section.type === 'active'" [class.border-primary/20]="section.type === 'active'"
+               [class.bg-amber-50]="section.type === 'upcoming'" [class.border-amber-200]="section.type === 'upcoming'"
+               [class.bg-green-50]="section.type === 'done'" [class.border-green-200]="section.type === 'done'">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                 [attr.stroke]="section.type === 'active' ? '#16a34a' : section.type === 'upcoming' ? '#d97706' : '#15803d'"
+                 stroke-width="2">
+              <path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9l-6-6z"/><path d="M9 3v6h6"/><path d="M12 11v6M9 14h6"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-sm mb-0.5 text-slate-800">{{ medOf(r).medication_name || 'Unknown' }}</p>
+            <p class="text-xs text-slate-500">{{ medOf(r).dosage || '' }} · {{ medOf(r).frequency || '' }}</p>
+          </div>
+          <span class="text-lg font-semibold text-primary-dark tabular-nums mr-3">{{ formatTime(r.reminder_time) }}</span>
+          <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-medium"
+                [class.bg-primary/10]="section.type === 'active'" [class.text-primary-dark]="section.type === 'active'" [class.border-primary/20]="section.type === 'active'"
+                [class.bg-amber-50]="section.type === 'upcoming'" [class.text-amber-700]="section.type === 'upcoming'" [class.border-amber-200]="section.type === 'upcoming'"
+                [class.bg-green-50]="section.type === 'done'" [class.text-green-700]="section.type === 'done'" [class.border-green-200]="section.type === 'done'"
+                style="border-width:1px">
+            {{ section.title }}
+          </span>
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- Medicine detail modal -->
+@if (selected(); as r) {
+  <div class="modal-overlay open fixed inset-0 bg-black/30 backdrop-blur-sm items-center justify-center z-50 p-5" (click)="close()">
+    <div class="bg-white border border-black/10 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-display text-2xl tracking-tight text-slate-800">{{ medOf(r).medication_name || 'Medication' }}</h3>
+        <button (click)="close()" class="w-8 h-8 rounded-full bg-primary-lighter border border-black/10 text-slate-500 flex items-center justify-center text-lg hover:text-slate-800 transition-colors cursor-pointer">×</button>
+      </div>
+      <div class="bg-primary-lighter border border-black/10 rounded-2xl p-6 mb-4">
+        <div class="flex items-start gap-3 py-3 border-b border-black/10"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Dosage</span><span class="flex-1 text-sm text-slate-700">{{ medOf(r).dosage || '—' }}</span></div>
+        <div class="flex items-start gap-3 py-3 border-b border-black/10"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Frequency</span><span class="flex-1 text-sm text-slate-700">{{ medOf(r).frequency || '—' }}</span></div>
+        <div class="flex items-start gap-3 py-3 border-b border-black/10"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Duration</span><span class="flex-1 text-sm text-slate-700">{{ medOf(r).duration || '—' }}</span></div>
+        <div class="flex items-start gap-3 py-3 border-b border-black/10"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Instructions</span><span class="flex-1 text-sm text-slate-700">{{ medOf(r).instructions || '—' }}</span></div>
+        <div class="flex items-start gap-3 py-3 border-b border-black/10"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Reminder</span><span class="flex-1 text-sm text-slate-700">{{ formatTime(r.reminder_time) }}</span></div>
+        <div class="flex items-start gap-3 py-3 border-b border-black/10"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Prescribed by</span><span class="flex-1 text-sm text-slate-700">{{ doctorOf(r).name || '—' }}</span></div>
+        <div class="flex items-start gap-3 py-3"><span class="w-32 flex-shrink-0 text-xs uppercase tracking-widest text-slate-400 pt-0.5">Notes</span><span class="flex-1 text-sm text-slate-700">{{ notesOf(r) }}</span></div>
+      </div>
+      @if (!r.completed_today) {
+        <button (click)="markTaken()" [disabled]="marking()"
+          class="w-full py-3.5 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-primary-dark transition-colors cursor-pointer border-none disabled:opacity-70">
+          @if (marking()) {
+            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+          } @else {
+            ✓ Mark as Taken
+          }
+        </button>
+      }
+    </div>
+  </div>
+}

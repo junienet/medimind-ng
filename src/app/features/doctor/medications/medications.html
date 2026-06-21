@@ -1,0 +1,116 @@
+<div class="mb-8"><h2 class="font-display text-3xl tracking-tight mb-1 text-slate-800">Medications</h2><p class="text-slate-500 text-sm">Manage the medication database</p></div>
+
+<button (click)="openAdd()" class="mb-6 px-5 py-2.5 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-primary-dark transition-colors cursor-pointer border-none shadow-sm">
+  + Add Medication
+</button>
+
+<div class="bg-white border border-black/10 rounded-2xl overflow-hidden shadow-sm">
+  <table class="w-full border-collapse">
+    <thead>
+      <tr class="border-b border-black/10 bg-primary-lighter">
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Name</th>
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Dosage</th>
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Frequency</th>
+        <th class="px-4 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-medium">Instructions</th>
+        <th class="px-4 py-3 text-right text-xs uppercase tracking-widest text-slate-500 font-medium">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading()) {
+        <tr><td colspan="5"><div class="flex items-center justify-center gap-3 py-10 text-slate-400"><div class="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div></div></td></tr>
+      } @else if (errorMessage()) {
+        <tr><td colspan="5" class="px-4 py-5 text-red-600 text-sm">{{ errorMessage() }}</td></tr>
+      } @else if (!meds().length) {
+        <tr><td colspan="5"><div class="text-center py-14 text-slate-400 text-sm">No medications yet. Add one above.</div></td></tr>
+      } @else {
+        @for (m of meds(); track m._id) {
+          <tr>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10 font-medium text-slate-800">{{ m.medication_name }}</td>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10 text-slate-700">{{ m.dosage }}</td>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10 text-slate-700">{{ m.frequency || '—' }}</td>
+            <td class="px-4 py-3.5 text-xs border-b border-black/10 text-slate-500">{{ m.instructions || '—' }}</td>
+            <td class="px-4 py-3.5 text-sm border-b border-black/10 text-right">
+              <div class="flex gap-2 justify-end">
+                <button (click)="openEdit(m)" class="px-3 py-1.5 border border-black/10 rounded-lg text-xs hover:border-primary hover:text-primary transition-colors text-slate-600 bg-primary-lighter cursor-pointer">Edit</button>
+                <button (click)="openDelete(m)" class="px-3 py-1.5 border border-red-200 rounded-lg text-xs hover:bg-red-50 transition-colors text-red-600 bg-white cursor-pointer">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Add / Edit medication modal -->
+@if (modalOpen()) {
+  <div class="modal-overlay open fixed inset-0 bg-black/30 backdrop-blur-sm items-center justify-center z-50 p-5" (click)="closeModal()">
+    <div class="bg-white border border-black/10 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-display text-2xl tracking-tight text-slate-800">{{ editingId() ? 'Edit Medication' : 'Add Medication' }}</h3>
+        <button (click)="closeModal()" class="w-8 h-8 rounded-full bg-primary-lighter border border-black/10 text-slate-500 flex items-center justify-center text-lg hover:text-slate-800 transition-colors cursor-pointer">×</button>
+      </div>
+      @if (modalError()) {
+        <div class="rounded-xl px-4 py-3 text-sm mb-5 bg-red-50 border border-red-200 text-red-700">{{ modalError() }}</div>
+      }
+      <div class="mb-4">
+        <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">Medication Name</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="e.g. Cetirizine" class="w-full px-4 py-3.5 bg-primary-lighter border border-black/10 rounded-xl text-slate-800 text-sm" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">Dosage</label>
+        <input type="text" [(ngModel)]="form.dosage" placeholder="e.g. 10mg" class="w-full px-4 py-3.5 bg-primary-lighter border border-black/10 rounded-xl text-slate-800 text-sm" />
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">Frequency</label>
+          <input type="text" [(ngModel)]="form.frequency" placeholder="Once daily" class="w-full px-4 py-3.5 bg-primary-lighter border border-black/10 rounded-xl text-slate-800 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">Duration</label>
+          <input type="text" [(ngModel)]="form.duration" placeholder="7 days" class="w-full px-4 py-3.5 bg-primary-lighter border border-black/10 rounded-xl text-slate-800 text-sm" />
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">Instructions</label>
+        <textarea [(ngModel)]="form.instructions" placeholder="e.g. Take after meals" class="w-full px-4 py-3.5 bg-primary-lighter border border-black/10 rounded-xl text-slate-800 text-sm"></textarea>
+      </div>
+      <div class="mb-6">
+        <label class="block text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">Description</label>
+        <textarea [(ngModel)]="form.description" placeholder="What is this medication for?" class="w-full px-4 py-3.5 bg-primary-lighter border border-black/10 rounded-xl text-slate-800 text-sm"></textarea>
+      </div>
+      <button (click)="save()" [disabled]="modalSaving()" class="w-full py-3.5 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-primary-dark transition-colors cursor-pointer border-none disabled:opacity-70">
+        @if (modalSaving()) {
+          <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+        } @else {
+          {{ editingId() ? 'Update Medication' : 'Save Medication' }}
+        }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Delete confirmation modal -->
+@if (deleteOpen(); as _open) {
+  <div class="modal-overlay open fixed inset-0 bg-black/30 backdrop-blur-sm items-center justify-center z-50 p-5" (click)="closeDelete()">
+    <div class="bg-white border border-black/10 rounded-2xl p-7 w-full max-w-sm shadow-xl" (click)="$event.stopPropagation()">
+      <div class="w-12 h-12 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+      </div>
+      <h3 class="font-display text-xl tracking-tight text-slate-800 mb-2">Delete medication?</h3>
+      <p class="text-sm text-slate-500 mb-1">You're about to delete <strong class="text-slate-700">{{ deleteTarget()?.medication_name }}</strong> from the catalogue.</p>
+      <p class="text-sm text-slate-500 mb-6">This can't be undone. Medications already used in a prescription can't be deleted.</p>
+      @if (deleteError()) {
+        <div class="rounded-xl px-4 py-3 text-sm mb-4 bg-red-50 border border-red-200 text-red-700">{{ deleteError() }}</div>
+      }
+      <div class="flex gap-3">
+        <button (click)="confirmDelete()" [disabled]="deleteSaving()" class="flex-1 py-2.5 bg-red-600 text-white font-semibold rounded-xl text-sm hover:bg-red-700 transition-colors cursor-pointer border-none disabled:opacity-70">
+          @if (deleteSaving()) {
+            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+          } @else { Delete }
+        </button>
+        <button (click)="closeDelete()" class="flex-1 py-2.5 border border-black/10 rounded-xl text-sm hover:border-black/30 transition-colors cursor-pointer bg-transparent text-slate-600">Cancel</button>
+      </div>
+    </div>
+  </div>
+}
