@@ -33,8 +33,9 @@ export class Dashboard implements OnInit {
   done = computed(() => this.bucket('done'));
 
   private bucket(type: 'active' | 'upcoming' | 'done'): Reminder[] {
-    const now = new Date();
-    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const nowUTC = new Date();
+    const nowMYT = new Date(nowUTC.getTime() + (8 * 60 * 60 * 1000));
+    const nowMins = nowMYT.getHours() * 60 + nowMYT.getMinutes();
     return this.reminders().filter((r) => {
       if (type === 'done') return !!r.completed_today;
       if (r.completed_today) return false;
